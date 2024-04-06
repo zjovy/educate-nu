@@ -1,15 +1,28 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+
 import './App.css'
+import Student from './components/Student.jsx'
+import Teacher from './components/Teacher.jsx'
+import Login from './components/Login.jsx'
 
 function App() {
 
+  const [userType, setUserType] = useState("")
+  const [showLogin, setShowLogin] = useState(false)
+  const [loggedIn, setLoggedIn] = useState(false)
+
   return (
-    <h1 className="text-3xl font-bold underline">
-      Hello world!
-    </h1>
+    <div className="bg-gray-900 min-h-screen flex flex-col justify-center items-center">
+      <h1 className="text-5xl font-bold text-indigo-200">NUEducation</h1>
+      <div className="flex flex-col space-y-4 mt-8">
+        <button className="hover:bg-gray-700 text-white py-2 px-4 rounded border border-white"
+                onClick={() => setShowLogin(true)}>
+          Get Started
+        </button>
+        {showLogin && <Login userType={userType} setUserType={setUserType} setShowLogin={setShowLogin} setLoggedIn={setLoggedIn}/>}
+      </div>
+    </div>
   )
 }
 
-export default App
+export default App;
