@@ -12,6 +12,7 @@ const Login = (props) => {
     const handleSubmit = (event) => {
         event.preventDefault();
         props.setUserType(userType);
+        props.setLoggedIn(true);
         props.setShowLogin(false);
     };
 
@@ -35,9 +36,9 @@ const Login = (props) => {
                     <h2 className="text-2xl font-bold mb-6 text-gray-800">Login</h2>
                     <form onSubmit={handleSubmit}>
                         <label className="block mb-5">
-                            <span className="text-gray-700">Are you a student or a teacher?</span>
+                            <span className="text-gray-700 text-lg mb-3 block">Are you a student or a teacher?</span>
                             <select
-                                className="form-select block w-full mt-1 border-gray-300 rounded shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                className="text-lg form-select block w-full mt-1 border-gray-300 rounded shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                                 value={userType}
                                 onChange={handleUserTypeChange}
                             >
@@ -63,6 +64,7 @@ Login.propTypes = {
     userType: PropTypes.string,
     setUserType: PropTypes.func.isRequired,
     setShowLogin: PropTypes.func.isRequired,
+    setLoggedIn: PropTypes.func.isRequired,
 };
 
 export default Login;
