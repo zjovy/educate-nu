@@ -1,0 +1,22 @@
+anyio @ file:///home/conda/feedstock_root/build_artifacts/anyio_1708355285029/work
+certifi @ file:///home/conda/feedstock_root/build_artifacts/certifi_1707022139797/work/certifi
+charset-normalizer==3.3.2
+colorama @ file:///home/conda/feedstock_root/build_artifacts/colorama_1666700638685/work
+distro @ file:///home/conda/feedstock_root/build_artifacts/distro_1704321475663/work
+exceptiongroup @ file:///home/conda/feedstock_root/build_artifacts/exceptiongroup_1704921103267/work
+h11 @ file:///home/conda/feedstock_root/build_artifacts/h11_1664132893548/work
+h2 @ file:///home/conda/feedstock_root/build_artifacts/h2_1634280454336/work
+hpack==4.0.0
+httpcore @ file:///home/conda/feedstock_root/build_artifacts/httpcore_1711596990900/work
+httpx @ file:///home/conda/feedstock_root/build_artifacts/httpx_1708530890843/work
+hyperframe @ file:///home/conda/feedstock_root/build_artifacts/hyperframe_1619110129307/work
+idna @ file:///home/conda/feedstock_root/build_artifacts/idna_1701026962277/work
+openai==1.16.1
+pydantic @ file:///Users/runner/miniforge3/conda-bld/pydantic_1710626964542/work
+requests==2.31.0
+setuptools==69.2.0
+sniffio @ file:///home/conda/feedstock_root/build_artifacts/sniffio_1708952932303/work
+tqdm @ file:///home/conda/feedstock_root/build_artifacts/tqdm_1707598593068/work
+typing_extensions @ file:///home/conda/feedstock_root/build_artifacts/typing_extensions_1712329955671/work
+urllib3==2.2.1
+wheel==0.43.0
