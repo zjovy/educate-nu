@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 from dotenv import load_dotenv
 import time
+from findRecs import search_duckduckgo
+
 # Load the environment variables from .env file where your OpenAI API key is stored
 load_dotenv()
 
@@ -102,6 +104,8 @@ def process_pdfs_and_generate_feedback(assistant_id, pdf_paths):
     if file_ids:
         response = get_assistant_response(assistant_id, file_ids)
         save_response_to_file(response)
+        # return the response
+        return response
     else:
         print("Failed to upload files, no IDs to proceed with.")
 
@@ -115,4 +119,5 @@ if __name__ == "__main__":
     assistant_id = 'asst_yxuSKnyE945ffRG2EeiNiFHc'
     
     pdf_paths = ['/Users/Isaac/Desktop/StudentHomework.pdf', '/Users/Isaac/Desktop/PracticeProblems.pdf', '/Users/Isaac/Desktop/AnswerKey.pdf']  # Replace with your actual PDF file paths
-    process_pdfs_and_generate_feedback(assistant_id, pdf_paths)
+    result = process_pdfs_and_generate_feedback(assistant_id, pdf_paths)
+    
