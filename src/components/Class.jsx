@@ -1,17 +1,46 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 
 import Assignments from './Assignments';
 import Assign from './Assign';
+import { fetchData } from '../apiService';
+
 const Class = ({ classData, teacherView }) => {
 
   const [assigning, setAssigning] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const [students, setStudents] = useState([]);
+
+  useEffect(() => {
+    const fetchStudentsForClass = async () => {
+        try {
+            // First, fetch enrollments for this class
+            const enrollmentData = await fetchData("enrollments");
+            const enrollmentsForClass = enrollmentData.records.filter(enrollment => 
+                parseInt(enrollment.course.value) === classData.id);
+
+            // Extract student IDs from enrollments
+            const studentIds = enrollmentsForClass.map(enrollment => parseInt(enrollment.student_id.value));
+
+            // Fetch all people
+            const peopleData = await fetchData("people");
+            const students = peopleData.records.filter(person => 
+                studentIds.includes(parseInt(person.id.value)));
+
+            // Now 'students' contains details for students enrolled in this class
+            setStudents(students);
+        } catch (error) {
+            console.error("There was a problem fetching enrollment or student data:", error);
+            // Handle or display the error as needed
+        }
+    };
+    fetchStudentsForClass();
+  }, [classData.id]); // Rerun if classData.id changes
+
+  console.log(students)
+
 
   const handleAddAssignment = () => {
-    // Logic to open Assign component for this specific class
-    // This could be a modal, a new page, or an in-line form
-    // For now, we'll simply log the action
     setAssigning(true);
   };
 
@@ -30,7 +59,7 @@ const Class = ({ classData, teacherView }) => {
           +
         </button>
       )}
-      <Assignments assignments={classData.assignments} setShowDetails={setShowDetails}/>
+      <Assignments assignments={classData.assignments} setShowDetails={setShowDetails} teacherView={teacherView} students={students}/>
       {assigning && (
         <Assign
           showAssignModal={assigning}

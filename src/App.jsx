@@ -16,7 +16,7 @@ function App() {
 
   return (
     <div> 
-      {/* {!loggedIn && <div className="bg-ghost-white min-h-screen flex flex-col justify-center items-center">
+      {!loggedIn && <div className="bg-[#272635] min-h-screen flex flex-col justify-center items-center">
         <h1 className="text-5xl font-bold blue-to-white-gradient-text">Educate NU</h1>
         <div className="flex flex-col space-y-4 mt-8">
           <button className="bg-gradient-to-r from-blue-600 to-blue-300 text-white font-bold py-2 px-4 rounded-full shadow-lg flex items-center hover:shadow-xl transform hover:-translate-y-1 transition duration-300 ease-in-out"
@@ -27,9 +27,8 @@ function App() {
           {showLogin && <Login setUserID={setUserID} setUserType={setUserType} setUserName={setUserName} setShowLogin={setShowLogin} setLoggedIn={setLoggedIn}/>}
         </div>
       </div>}
-      {loggedIn && <div className="bg-ghost-white min-h-screen flex flex-col">
+      {loggedIn && <div className="bg-[#272635] min-h-screen flex flex-col">
         {userType === "student" && <Student userID={userID} userName={userName}/>}
-
         {userType === "teacher" && <Teacher teacherID={userID} teacherName={userName}/>}
       </div>}
     </div>
