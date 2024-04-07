@@ -6,9 +6,10 @@ const Feedback = ({ data }) => {
 
     useEffect(() => {
         // Parse the review_areas from JSON strings to objects
-        const parsedReviewAreas = data.review_areas.map(area => JSON.parse(area));
-        setReviewAreas(parsedReviewAreas);
+        setReviewAreas(data.review_areas);
     }, [data.review_areas]);
+
+    console.log(data);
 
     return (
         <div className="grading-feedback">

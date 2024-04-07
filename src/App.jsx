@@ -5,6 +5,7 @@ import Teacher from './components/Teacher.jsx'
 import Login from './components/Login.jsx'
 import YouTubeColumn  from './components/YouTubeVideoList.jsx'
 import URLout from './components/URLout.jsx'
+import { GradingProvider } from './components/GradingProvider.jsx'
 
 function App() {
 
@@ -28,8 +29,10 @@ function App() {
         </div>
       </div>}
       {loggedIn && <div className="bg-[#272635] min-h-screen flex flex-col">
-        {userType === "student" && <Student userID={userID} userName={userName}/>}
-        {userType === "teacher" && <Teacher teacherID={userID} teacherName={userName}/>}
+        <GradingProvider>
+          {userType === "student" && <Student userID={userID} userName={userName}/>}
+          {userType === "teacher" && <Teacher teacherID={userID} teacherName={userName}/>}
+        </GradingProvider>
       </div>}
     </div>
   )

@@ -9,6 +9,7 @@ const Teacher = (props) => {
     const [courses, setCourses] = useState([]);
     const [assignments, setAssignments] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    
 
     const formatDate = (dateString) => {
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
