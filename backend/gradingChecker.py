@@ -4,20 +4,24 @@ from dotenv import load_dotenv
 import time
 from findRecs import findRecs
 import re
+from io import BytesIO
+
 # Load the environment variables from .env file where your OpenAI API key is stored
 load_dotenv()
 
 #We need to upload the file so that our model is able to analyze on these pdfs 
-def upload_file_to_openai(file_path):
-    file_list = []
+def upload_file_to_openai(file_content, file_name):
+    if not file_name.endswith('.pdf'):
+        file_name += '.pdf'
+    file_like_object = BytesIO(file_content)
+    file_like_object.name = file_name
     try:
-        with open(file_path, 'rb') as file:
-            response = client.files.create(file=file, purpose='assistants')  # The purpose might need to be changed based on the specific API endpoint you're using
-            # Consider cleaning up the .jsonl file after uploading if you don't need it locally=
-            return response.id
+        response = client.files.create(file=file_like_object, purpose='assistants')
+        file_like_object.close()
+        return response.id
     except client.error.OpenAIError as e:
         print(f"An error occurred: {e}")
-        return None, None
+        return None
 
 # Function to call OpenAI Assistant and get the response
 def get_assistant_response(assistant_id, file_ids):
@@ -25,22 +29,30 @@ def get_assistant_response(assistant_id, file_ids):
             In addition, the PracticeProblems provides all of the problems. In addition, please note down the areas where the student 
             might not be understanding the material and provide constructive feedback to areas of improvement for the student. 
             At the end, please return just a score, areas where the student is struggling and why, and then a list of topics that the student should look into. 
-            The format of the headers of the response should follow the following format word for word. Score: and then Areas of Improvement: and then List of Areas to Review. 
+            The format of the headers of the response should follow the following format word for word. Score: and then Feedback: and then List of Areas to Review. 
             Can we have the List of Areas to Review just be a list of numbered topics that the student should look into. It should only be the topic in quotes. For example it could look like this:
             List of Areas to Review: 1. "Geometry" 2. "Algebra" etc etc. 
+            The score should just be a percentage between 0 and 100 symbolizing their accuracy. 
+            Feedback should provide a detailed analysis on every problem that appears to be incorrect. Please write it in the perspective of a teacher instructing a student on areas to improve. Be warm!
+            In addition, make sure that it's directly just Feedback: and then a numbered list of the feedback per question.
             Make sure the areas to review are very specific and can be used to find video resources to supplement learning.'''
     try:
         my_assistant = client.beta.assistants.update(
             assistant_id=assistant_id,
             file_ids=file_ids
         )
+        print("Assistant updated with file IDs")
         my_assistant = client.beta.assistants.retrieve(assistant_id)
+        print("Assistant retrieved")
         thread = client.beta.threads.create()
+        print("Thread created")
         message = client.beta.threads.messages.create(
               thread_id=thread.id, # thread id from the above instance
               role="user",
               content=prompt)
+        print("Message created")
         run = create_assistant_run(client,my_assistant,thread,"")
+        print("Run created")
         run_status = client.beta.threads.runs.retrieve(
             thread_id = thread.id,
             run_id = run.id)
@@ -90,15 +102,48 @@ def print_thread_messages(clnt: object, thrd: object, content_value: bool=True) 
     return response_string
 
 # Main function to tie everything together
-def process_pdfs_and_generate_feedback(assistant_id, pdf_paths):
-    file_ids = [upload_file_to_openai(pdf_path) for pdf_path in pdf_paths if upload_file_to_openai(pdf_path) is not None]
-    print(file_ids)
+def process_pdfs_and_generate_feedback(assistant_id, pdf_objects):
+    # This function will receive a list of binary PDF data and filenames
+    file_ids = []
+    for pdf_object, filename in pdf_objects:
+        file_id = upload_file_to_openai(pdf_object, filename)
+        if file_id:
+            file_ids.append(file_id)
+    
     if file_ids:
         response = get_assistant_response(assistant_id, file_ids)
-        # return the response
         return response
     else:
         print("Failed to upload files, no IDs to proceed with.")
+        return None
+
+def extract_score(text):
+    # Pattern to capture a percentage number (including decimals) following the "Score:" label
+    pattern = r'\*\*Score:\*\*\s*(\d+\.?\d*%)'
+    match = re.search(pattern, text)
+
+    # Return the captured score percentage if a match is found
+    return match.group(1) if match else None
+
+def extract_feedback(text):
+    # Find the "Feedback" section and capture until "List of Areas to Review" or end of the section
+    pattern = r'\*\*Feedback:\*\*\s*\n((?:\d+\..*?)(?=\n\d+\.|\n\*\*|$))'
+    match = re.search(pattern, text, re.DOTALL)
+
+    if match:
+        # Extract the feedback section
+        feedback_section = match.group(1)
+        # Split into individual feedback items based on numbering
+        feedback_items = re.split(r'\n(?=\d+\.)', feedback_section)
+        # Strip whitespace and newlines from each feedback item
+        feedback_items = [item.strip() for item in feedback_items if item.strip()]
+        return feedback_items
+
+    return []
+def clean_feedback(feedback_list):
+    # Removing source references like   from each feedback string
+    cleaned_feedback = [re.sub(r'【\d+†source】', '', feedback).strip() for feedback in feedback_list]
+    return cleaned_feedback
 
 def extract_review_areas(text):
     # Pattern to find quoted topic names in the "List of Areas to Review" section
@@ -108,24 +153,32 @@ def extract_review_areas(text):
     return topics
 
 # Example usage
-if __name__ == "__main__":
+def gradingChecker(pdf_objects):
     # Initialize your OpenAI API key
     load_dotenv()
     SECRET_KEY = os.getenv("OPEN_AI_KEY")
+    global client
     client = OpenAI(api_key = SECRET_KEY)
-    # You need to replace 'your-assistant-id' with the actual ID of your assistant
     assistant_id = 'asst_yxuSKnyE945ffRG2EeiNiFHc'
-    
-    pdf_paths = ['/Users/Isaac/Desktop/StudentHomework.pdf', '/Users/Isaac/Desktop/PracticeProblems.pdf', '/Users/Isaac/Desktop/AnswerKey.pdf']  # Replace with your actual PDF file paths
-    result = process_pdfs_and_generate_feedback(assistant_id, pdf_paths)
+    print("got here")
+    print("number of objects", len(pdf_objects))
+    result = process_pdfs_and_generate_feedback(assistant_id, pdf_objects)
     topics = extract_review_areas(result)
     print("HERE ARE THE TOPICS")
     print(topics)
     filtered_topics = [topic for topic in topics if topic not in ['Geometry', 'Algebra']]
     print("Here are the filtered topics")
     print(filtered_topics)
+    recommendations = []
     for topic in filtered_topics: #this might be the worst way to do this hahaha
-        recommendations = findRecs(topic)
-        print(f"Recommendations for {topic}: {recommendations}")
+        recommendations_string = findRecs(topic)
+        print(f"Recommendations for {topic}: {recommendations_string}")
+        recommendations.append(recommendations_string)
+    score = extract_score(result)
+    feedback = extract_feedback(result) 
+    cleaned_feedback = clean_feedback(feedback)
+    print(f"Score: {score}")
+    print(f"Feedback: {cleaned_feedback}")
+    return score, cleaned_feedback, recommendations
 
     
