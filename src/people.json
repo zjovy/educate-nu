@@ -1,0 +1,109 @@
+{
+    "records": [
+        {
+            "Updated_datetime": {
+                "type": "UPDATED_TIME",
+                "value": "2024-04-07T01:01:00Z"
+            },
+            "Created_datetime": {
+                "type": "CREATED_TIME",
+                "value": "2024-04-07T01:01:00Z"
+            },
+            "last": {
+                "type": "SINGLE_LINE_TEXT",
+                "value": "Sun"
+            },
+            "id": {
+                "type": "RECORD_NUMBER",
+                "value": "2"
+            },
+            "Created_by": {
+                "type": "CREATOR",
+                "value": {
+                    "code": "richardlam2024@u.northwestern.edu",
+                    "name": "richardlam2024@u.northwestern.edu"
+                }
+            },
+            "$revision": {
+                "type": "__REVISION__",
+                "value": "1"
+            },
+            "type": {
+                "type": "RADIO_BUTTON",
+                "value": "Teacher"
+            },
+            "Updated_by": {
+                "type": "MODIFIER",
+                "value": {
+                    "code": "richardlam2024@u.northwestern.edu",
+                    "name": "richardlam2024@u.northwestern.edu"
+                }
+            },
+            "first": {
+                "type": "SINGLE_LINE_TEXT",
+                "value": "Issac"
+            },
+            "email": {
+                "type": "SINGLE_LINE_TEXT",
+                "value": "issacun2025@u.northwestern.edu"
+            },
+            "$id": {
+                "type": "__ID__",
+                "value": "2"
+            }
+        },
+        {
+            "Updated_datetime": {
+                "type": "UPDATED_TIME",
+                "value": "2024-04-07T01:00:00Z"
+            },
+            "Created_datetime": {
+                "type": "CREATED_TIME",
+                "value": "2024-04-07T01:00:00Z"
+            },
+            "last": {
+                "type": "SINGLE_LINE_TEXT",
+                "value": "Lam"
+            },
+            "id": {
+                "type": "RECORD_NUMBER",
+                "value": "1"
+            },
+            "Created_by": {
+                "type": "CREATOR",
+                "value": {
+                    "code": "richardlam2024@u.northwestern.edu",
+                    "name": "richardlam2024@u.northwestern.edu"
+                }
+            },
+            "$revision": {
+                "type": "__REVISION__",
+                "value": "1"
+            },
+            "type": {
+                "type": "RADIO_BUTTON",
+                "value": "Student"
+            },
+            "Updated_by": {
+                "type": "MODIFIER",
+                "value": {
+                    "code": "richardlam2024@u.northwestern.edu",
+                    "name": "richardlam2024@u.northwestern.edu"
+                }
+            },
+            "first": {
+                "type": "SINGLE_LINE_TEXT",
+                "value": "Richard"
+            },
+            "email": {
+                "type": "SINGLE_LINE_TEXT",
+                "value": "richardlam2024@u.northwestern.edu"
+            },
+            "$id": {
+                "type": "__ID__",
+                "value": "1"
+            }
+        }
+    ],
+    "totalCount": null
+}

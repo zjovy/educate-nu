@@ -2,8 +2,7 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 
 const Login = (props) => {
-
-    const [userType, setUserType] = useState("")
+    const [userType, setUserType] = useState("");
 
     const handleUserTypeChange = (event) => {
         setUserType(event.target.value);
@@ -17,51 +16,47 @@ const Login = (props) => {
     };
 
     const handleClose = () => {
-        // Logic to hide the login form or navigate away
         props.setShowLogin(false);
     };
 
     return (
         // Create an overlay for the popup
-        <div className="fixed inset-0">
+        <div className="fixed inset-0 flex items-center justify-center min-h-screen">
             {/* Center the card on the overlay */}
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="relative p-8 bg-white rounded shadow-lg w-full max-w-md m-4">
-                    <button 
-                        onClick={handleClose}
-                        className="absolute top-0 right-0 m-2 text-gray-600 hover:text-gray-900 transition-colors"
-                    >
-                        <span className="text-xl">&times;</span>
-                    </button>
-                    <h2 className="text-2xl font-bold mb-6 text-gray-800">Login</h2>
-                    <form onSubmit={handleSubmit}>
-                        <label className="block mb-5">
-                            <span className="text-gray-700 text-lg mb-3 block">Are you a student or a teacher?</span>
-                            <select
-                                className="text-lg form-select block w-full mt-1 border-gray-300 rounded shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                value={userType}
-                                onChange={handleUserTypeChange}
-                            >
-                                <option value="">Select</option>
-                                <option value="student">Student</option>
-                                <option value="teacher">Teacher</option>
-                            </select>
-                        </label>
-                        <button
-                            type="submit"
-                            className="w-full bg-indigo-600 text-white font-bold py-2 px-4 rounded hover:bg-indigo-700 focus:outline-none focus:bg-indigo-700"
+            <div className="relative p-8 bg-[#E8E9F3] rounded shadow-lg w-full max-w-md m-4">
+                <button 
+                    onClick={handleClose}
+                    className="absolute top-0 right-0 m-2 text-[#CECECE] hover:text-[#A6A6A8] transition-colors"
+                >
+                    <span className="text-xl">&times;</span>
+                </button>
+                <h2 className="text-2xl font-bold mb-6 text-[#272635]">Login</h2>
+                <form onSubmit={handleSubmit}>
+                    <label className="block mb-5">
+                        <span className="text-[#272635] text-lg mb-3 block">Are you a student or a teacher?</span>
+                        <select
+                            className="text-lg form-select block w-full mt-1 border-gray-300 rounded shadow-sm focus:border-[#B1E5F2] focus:ring focus:ring-[#B1E5F2] focus:ring-opacity-50"
+                            value={userType}
+                            onChange={handleUserTypeChange}
                         >
-                            Login
-                        </button>
-                    </form>
-                </div>
+                            <option value="">Select</option>
+                            <option value="student">Student</option>
+                            <option value="teacher">Teacher</option>
+                        </select>
+                    </label>
+                    <button
+                        type="submit"
+                        className="w-full bg-gradient-to-r from-blue-600 to-blue-300 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:ring focus:ring-[#E8E9F3] focus:ring-opacity-50 shadow-lg transition ease-in-out duration-300 transform hover:-translate-y-1"
+                    >
+                        Login
+                    </button>
+                </form>
             </div>
         </div>
     );
 };
 
 Login.propTypes = {
-    userType: PropTypes.string,
     setUserType: PropTypes.func.isRequired,
     setShowLogin: PropTypes.func.isRequired,
     setLoggedIn: PropTypes.func.isRequired,
