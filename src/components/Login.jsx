@@ -1,9 +1,21 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+
+import { fetchData } from '../apiService';
 
 const Login = (props) => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [userData, setUserData] = useState([]);
+
+    useEffect(() => {
+        const getUserData = async () => {
+          const data = await fetchData("people");
+          setUserData(data.records || []);
+        };
+        
+        getUserData();
+    }, []);
 
     const handleEmailChange = (event) => {
         setEmail(event.target.value);
@@ -15,9 +27,23 @@ const Login = (props) => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        // Here you might want to add authentication logic
-        props.setLoggedIn(true);
-        props.setShowLogin(false);
+        // Search for the user data by email
+        const userRecord = userData.find((record) => record.email.value.toLowerCase() === email.toLowerCase());
+
+        if (userRecord) {
+            // If user found, set the user type and user ID
+            const userType = userRecord.type.value;
+            const userID = userRecord.id.value;
+            const userName = userRecord.first.value + " " + userRecord.last.value;
+            props.setUserType(userType.toLowerCase());
+            props.setUserID(userID);
+            props.setUserName(userName)
+            props.setLoggedIn(true);
+            props.setShowLogin(false);
+        } else {
+            // If user not found, handle accordingly (e.g., show an error message)
+            alert('User not found. Please check your email or sign up.');
+        }
     };
 
     const handleClose = () => {
@@ -74,6 +100,9 @@ const Login = (props) => {
 Login.propTypes = {
     setLoggedIn: PropTypes.func.isRequired,
     setShowLogin: PropTypes.func.isRequired,
+    setUserType: PropTypes.func.isRequired,
+    setUserID: PropTypes.func.isRequired,
+    setUserName: PropTypes.func.isRequired,
 };
 
 export default Login;

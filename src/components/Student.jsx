@@ -1,72 +1,88 @@
 import { useEffect, useState } from 'react';
-import { fetchData } from '../apiService';
+import PropTypes from 'prop-types';
 
+import { fetchData } from '../apiService';
 import Classes from './Classes';
 
-
-const Student = () => {
-
-    const [classes, setClasses] = useState([]);
+const Student = (props) => {
+    const [courses, setCourses] = useState([]);
+    const [assignments, setAssignments] = useState([]);
 
     useEffect(() => {
-        const getClasses = async () => {
-          const data = await fetchData("courses");
-          setClasses(data.records || []);
+        const fetchAssignments = async () => {
+            const assignmentsData = await fetchData("assignments");
+            setAssignments(assignmentsData.records || []);
         };
-        
-        getClasses();
+
+        fetchAssignments();
     }, []);
 
-    console.log(classes);
+    useEffect(() => {
+        const fetchEnrollmentsAndCourses = async () => {
+            const enrollmentsData = await fetchData("enrollments");
+            const studentEnrollments = (enrollmentsData.records || []).filter(enrollment => 
+                enrollment.student_id.value === props.userID
+            );
 
-    const classesData = [
-        {
-          id: 1,
-          name: "Biology 101",
-          teacherId: 1,
-          assignments: [
-            {
-              id: 1,
-              title: "Cell Structure",
-              description: "Learn about cells and their structure.",
-              dueDate: "04/06/24",
-            },
-            {
-              id: 2,
-              title: "Photosynthesis",
-              description: "Explore how plants convert light into energy.",
-              dueDate: "04/06/24",
-            },
-          ],
-          enrollments: [
-            { studentId: 2, enrollmentId: 1 },
-          ],
-        },
-        {
-          id: 2,
-          name: "Chemistry 101",
-          teacherId: 1,
-          assignments: [
-            {
-              id: 3,
-              title: "Periodic Table",
-              description: "Memorize the elements of the periodic table.",
-              dueDate: "04/06/24",
-            },
-          ],
-          enrollments: [
-            { studentId: 2, enrollmentId: 2 },
-            { studentId: 3, enrollmentId: 3 },
-          ],
-        },
-    ];
+            const coursesData = await fetchData("courses");
+            const allCourses = coursesData.records || [];
+
+            const enrolledCourses = studentEnrollments.map(enrollment => {
+                const courseID = enrollment.course.value;
+                const course = allCourses.find(course => course.id.value === courseID);
+                
+                if (course) {
+                    const courseAssignments = assignments.filter(assignment => 
+                        assignment.course_id.value === courseID
+                    ).map(assignment => ({
+                        id: parseInt(assignment.assignment_id.value),
+                        title: assignment.title.value,
+                        description: assignment.description.value,
+                        dueDate: assignment.due.value,
+                        problems: assignment.problems.value.map(file => ({
+                            fileKey: file.fileKey,
+                            name: file.name,
+                            contentType: file.contentType,
+                            size: file.size
+                        })),
+                        solutions: assignment.solutions.value.map(file => ({
+                            fileKey: file.fileKey,
+                            name: file.name,
+                            contentType: file.contentType,
+                            size: file.size
+                        }))
+                    }));
+
+                    return {
+                        id: parseInt(course.id.value),
+                        name: course.title.value,
+                        teacherId: parseInt(course.teacher_id.value),
+                        assignments: courseAssignments,
+                    };
+                }
+                return null;
+            }).filter(course => course !== null);
+
+            setCourses(enrolledCourses);
+        };
+
+        // Ensure assignments are loaded before fetching enrollments and courses
+        if (assignments.length > 0) {
+            fetchEnrollmentsAndCourses();
+        }
+    }, [props.userID, assignments]);
 
     return ( 
         <div>
-            <h1 className="text-3xl font-bold purple-gradient-text m-3">Hello, Student</h1>
-            <Classes classes={classesData} />
+            <h1 className="text-3xl font-bold purple-gradient-text m-3">Hello, {props.userName}</h1>
+            <Classes classes={courses} />
         </div>
     );
 }
- 
+
+Student.propTypes = {
+  userID: PropTypes.string.isRequired,
+  userName: PropTypes.string.isRequired,
+};
+
 export default Student;
