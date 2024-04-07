@@ -119,7 +119,10 @@ def process_pdfs_and_generate_feedback(assistant_id, pdf_objects):
 
 def extract_score(text):
     # Pattern to capture a percentage number (including decimals) following the "Score:" label
-    pattern = r'\*\*Score:\*\*\s*(\d+\.?\d*%)'
+    # Handles multiple variations of the label
+    pattern = (
+        r'(?:\*\*Score:\*\*|assistant:Score:|Score:|score:|\bScore\b)\s*(\d+\.?\d*%)'
+    )
     match = re.search(pattern, text)
 
     # Return the captured score percentage if a match is found
@@ -127,19 +130,20 @@ def extract_score(text):
 
 def extract_feedback(text):
     # Find the "Feedback" section and capture until "List of Areas to Review" or end of the section
-    pattern = r'\*\*Feedback:\*\*\s*\n((?:\d+\..*?)(?=\n\d+\.|\n\*\*|$))'
-    match = re.search(pattern, text, re.DOTALL)
+    # Pattern matches numbered items, optionally followed by "Problem X" or "Question X"
+    pattern = r'\*\*Feedback:\*\*(.*?)\n\*\*List of Areas to Review:\*\*'
+    feedback_section = re.search(pattern, text, re.DOTALL)
 
-    if match:
-        # Extract the feedback section
-        feedback_section = match.group(1)
-        # Split into individual feedback items based on numbering
-        feedback_items = re.split(r'\n(?=\d+\.)', feedback_section)
+    if feedback_section:
+        feedback_section = feedback_section.group(1)
+        # Split into individual feedback items based on numbering, supporting various formats
+        feedback_items = re.split(r'\n(?=\d+\.\s*(\*\*Question\s+\d+:\*\*|\*\*Problem\s+\d+:\*\*|\d+\.\s*))', feedback_section)
         # Strip whitespace and newlines from each feedback item
         feedback_items = [item.strip() for item in feedback_items if item.strip()]
         return feedback_items
 
     return []
+
 def clean_feedback(feedback_list):
     # Removing source references like   from each feedback string
     cleaned_feedback = [re.sub(r'【\d+†source】', '', feedback).strip() for feedback in feedback_list]
@@ -176,6 +180,7 @@ def gradingChecker(pdf_objects):
         recommendations.append(recommendations_string)
     score = extract_score(result)
     feedback = extract_feedback(result) 
+    print("here's the feedback",feedback)
     cleaned_feedback = clean_feedback(feedback)
     print(f"Score: {score}")
     print(f"Feedback: {cleaned_feedback}")
