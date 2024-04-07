@@ -82,29 +82,32 @@ const Student = (props) => {
             fetchEnrollmentsAndCourses();
         }
     }, [props.userID, assignments]);
-    
+
     useEffect(() => {
-        const fetchGradedAssignments = async () => {
-          try {
-            const response = await fetch('http://localhost:8000/assignments/graded/');
-            if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-      
-            if (JSON.stringify(data) !== JSON.stringify(gradedAssignments)) {
-              setGradedAssignments(data);
-            }
-          } catch (error) {
-            console.error("Failed to fetch graded assignments:", error);
-          }
-        };
-      
-        fetchGradedAssignments();
-        const interval = setInterval(fetchGradedAssignments, 5000); // Poll every 5 seconds
-      
-        return () => clearInterval(interval);
-      }, [gradedAssignments]);
+    const fetchGradedAssignments = async () => {
+        console.log("Attempting to fetch graded assignments");
+        try {
+        const response = await fetch('http://localhost:8000/assignments/graded/');
+        if (!response.ok) {
+            console.error(`HTTP error! status: ${response.status}`, await response.text());
+            return;
+        }
+        const data = await response.json();
+        console.log("Fetched graded assignments:", data);
+        
+        setGradedAssignments(data);
+        } catch (error) {
+        console.error("Failed to fetch graded assignments:", error);
+        }
+    };
+
+    // Call the fetch function immediately and also set it up to poll every 5 seconds
+    fetchGradedAssignments();
+    const interval = setInterval(fetchGradedAssignments, 5000);
+    
+    // Clean up interval on component unmount
+    return () => clearInterval(interval);
+    }, []);
 
     return ( 
         <div>
