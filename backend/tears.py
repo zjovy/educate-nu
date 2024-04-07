@@ -1,7 +1,8 @@
 from http.client import HTTPException
-from fastapi import FastAPI, HTTPException, File, UploadFile
+from fastapi import FastAPI, HTTPException, File, UploadFile, Response
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
+
 import requests
 import os
 
@@ -70,6 +71,23 @@ async def assignments():
         
         raise HTTPException(status_code=response.status_code, detail=error_message)
     
+@app.get("/assignmentFiles/")
+async def assignmentFiles(fileKey: str, fileName: str):
+    url = f"http://{KINTONE_DOMAIN}/k/v1/file.json?fileKey={fileKey}"
+    headers = {
+        "Content-Type": "application/json",
+        "X-Cybozu-API-Token": ASSIGNMENTS_TOKEN,
+    }
+    
+    response = requests.get(url, headers=headers)
+    
+    if response.status_code == 200:
+        print(response)
+        return Response(content=response.content, media_type="application/pdf", headers={"Content-Disposition": f"attachment; filename={fileName}.pdf"})
+    else:       
+        error_message = response.json().get("message")
+        raise HTTPException(status_code=response.status_code, detail=error_message)
+
 @app.get("/courses/")
 async def courses():
     url = f"http://{KINTONE_DOMAIN}/k/v1/records.json?app={COURSES_ID}"
@@ -145,10 +163,10 @@ async def submissions():
         error_message = response.json().get("message")
         
         raise HTTPException(status_code=response.status_code, detail=error_message)
-    
+        
 @app.post("/people/")
-async def people(first, last, email, personType):
-    url = f"http://{KINTONE_DOMAIN}/k/v1/records.json"
+async def people():
+    url = f"http://{KINTONE_DOMAIN}/k/v1/records.json?app={PEOPLE_ID}"
     
     headers = {
         "Content-Type": "application/json",
