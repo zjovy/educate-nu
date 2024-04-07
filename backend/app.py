@@ -1,4 +1,6 @@
+from base64 import b64encode
 from http.client import HTTPException
+from io import BytesIO
 from fastapi import FastAPI, HTTPException, File, UploadFile, Response, Request
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
@@ -57,6 +59,95 @@ async def download_assignment_file(client, file_key, file_name):
     response = await client.get(download_url)
     response.raise_for_status()
     return response.content, file_name
+
+
+async def upload(file_content, file_name):
+    url = f'https://{KINTONE_DOMAIN}/k/v1/file.json'
+    response = requests.post(url, files={file_name, BytesIO(file_content)})
+    if response.status_code == 200:
+        print('File uploaded successfully.')
+    else:
+        print('Failed to upload file. Status code:', response.status_code)
+        print('Response:', response.text)
+        
+@app.post("/assignment/")
+async def newAssignment(course: int, title: str, description: str, due: str,problems: UploadFile = File(...), solutions: UploadFile = File(...)):
+    
+    # Problems File
+    problems_content = await problems.read()
+    encoded_problems = b64encode(problems_content).decode('utf-8')
+
+    headers = {
+        'X-Cybozu-API-Token': ASSIGNMENTS_TOKEN,
+        'Content-Type': 'application/json'
+    }
+    data = {
+        'file': {
+            'name': problems.filename,
+            'content': encoded_problems
+        }
+    }
+    response = requests.post(f'https://{KINTONE_DOMAIN}/k/v1/file.json', headers=headers, json=data)
+    
+    if response.status_code == 200:
+        problemsFileKey = response.json().get('fileKey')
+    else:
+        return {"message": "Failed to upload file", "error": response.text}
+    
+
+    # Solutions File
+    solutions_content = await solutions.read()
+    encoded_problems = b64encode(solutions_content).decode('utf-8')
+
+    headers = {
+        'X-Cybozu-API-Token': ASSIGNMENTS_TOKEN,
+        'Content-Type': 'application/json'
+    }
+    data = {
+        'file': {
+            'name': solutions.filename,
+            'content': encoded_problems
+        }
+    }
+    response = requests.post(f'https://{KINTONE_DOMAIN}/k/v1/file.json', headers=headers, json=data)
+    
+    if response.status_code == 200:
+        solutionsFileKey = response.json().get('fileKey')
+    else:
+        return {"message": "Failed to upload file", "error": response.text}
+    
+    url = f"https://{KINTONE_DOMAIN}/k/v1/record.json?app={ASSIGNMENTS_ID}"
+    
+    headers = {
+        "Content-Type": "application/json",
+        "X-Cybozu-API-Token": ASSIGNMENTS_TOKEN,
+        "app": ASSIGNMENT_ID
+    }
+    
+    data = {
+        "title": {"value": title},
+        "course": {"value": course},
+        "description": {"value": description},
+        "due": {"value": due},
+        "problems": {"value": [{"fileKey": problemsFileKey}]},
+        "solutions": {"value": [{"fileKey": solutionsFileKey}]}
+    }
+    
+    payload = {
+        "app": PEOPLE_ID,
+        "record": data
+    }
+        
+    response = requests.post(url, headers=headers, json=payload)
+    
+    if response.status_code == 200:
+        print(response.json())
+        return response.json()
+    else:
+        error_message = response.json().get("message")
+        raise HTTPException(status_code=response.status_code, detail=error_message)
+    
+
 
 @app.post("/grade")
 async def grade_pdfs(data: GradingData):
