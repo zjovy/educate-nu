@@ -6,6 +6,7 @@ from gradingChecker import gradingChecker,process_pdfs_and_generate_feedback, ex
 from pydantic import BaseModel
 import requests
 import os
+from httpx import AsyncClient
 
 app = FastAPI()
 
@@ -38,51 +39,77 @@ ENROLLMENTS_ID = os.environ.get("ENROLLMENTS_ID")
 class GradingData(BaseModel):
     ASSIGNMENT_NAME: str
 
-app = FastAPI()
+async def fetch_data(client, url):
+    response = await client.get(url)
+    response.raise_for_status()  # Will raise an exception for HTTP errors
+    return response.json()
+
+async def download_submission_file(client, file_key, file_name):
+    download_url = f"/submissionFiles/?fileKey={file_key}&fileName={file_name}"
+    response = await client.get(download_url)
+    response.raise_for_status()
+    return response.content, file_name
+
+async def download_assignment_file(client, file_key, file_name):
+    download_url = f"/assignmentFiles/?fileKey={file_key}&fileName={file_name}"
+    response = await client.get(download_url)
+    response.raise_for_status()
+    return response.content, file_name
 
 @app.post("/grade")
 async def grade_pdfs(data: GradingData):
     if not data.ASSIGNMENT_NAME:
-        raise HTTPException(status_code=400, detail="Missing assistant_id or ASSIGNMENT_NAME")
+        raise HTTPException(status_code=400, detail="Missing ASSIGNMENT_NAME")
 
-    assignments_data = await assignments()  # Assuming this function returns a JSON with assignments data
-    print(assignments_data)
-    matching_assignment = next((item for item in assignments_data['records'] if item['title']['value'] == data.ASSIGNMENT_NAME), None)
-
-    if not matching_assignment:
-        raise HTTPException(status_code=404, detail="Assignment not found")
-
-    assignment_id = matching_assignment['assignment_id']['value']
+    base_url = "http://127.0.0.1:8000"  # Replace with the actual base URL if different
     all_files = []  # This should be used to collect all file contents
 
-    # We want to iterate over the fetched assignments data to find the specific assignment and its files
-    for record in assignments_data['records']:
-        if record['assignment_id']['value'] == assignment_id:
-            # Assume 'problems' contains the files related to the assignment, adjust as needed
-            for file_info in record['problems']['value']:
-                file_key = file_info['fileKey']
-                file_name = file_info['name']  # Use the original file name from the record
-                file_response = await assignmentFiles(file_key, file_name)
-                all_files.append(file_response.content)  # Append the file content to the all_files list
-    submissions_data = await submissions()  # This function should be defined to fetch submissions data
-
-    # Filter submissions by assignment_id and download their files
-    for submission in submissions_data['records']:
-        if submission['assignment_id']['value'] == assignment_id:
-            for file_info in submission['attempt']['value']:
-                file_key = file_info['fileKey']
-                file_name = file_info['name']  # Use the original file name from the submission record
-                file_response = await assignmentFiles(file_key, file_name)  # Assuming this function is async and fetches files correctly
-                all_files.append(file_response.content)  # Append the file content to the all_files list
-    # We need to get the submission files for the students too 
-    '''
-    So to fully integrate and implement this, we're gonna have to have the files from the teacher in one list, and al lof the submissions on the other. This is because 
-    we need to compare the submissions to the teacher's files. However, for an MVP one file is enough and hence why we just leave it in all files. 
-    '''
-    [score, feedback, review_areas] = gradingChecker(all_files)
-    print(score)
-    print(feedback)
-    print(review_areas)
+    async with AsyncClient(base_url=base_url) as client:
+        assignments_data = await fetch_data(client, "/assignments/")
+        matching_submission = next((item for item in assignments_data['records'] if item.get('title', {}).get('value') == data.ASSIGNMENT_NAME), None)
+        
+        if matching_submission:
+            assignment_id = matching_submission['assignment_id']['value']
+        else:
+            raise HTTPException(status_code=404, detail="Assignment not found")
+        print("Assignment ID:", assignment_id)
+        # Fetch assignment files
+        for record in assignments_data['records']:
+            if record['assignment_id']['value'] == assignment_id:
+                for file_info in record['problems']['value']:
+                    file_key = file_info['fileKey']
+                    file_name = file_info['name']
+                    content, _ = await download_assignment_file(client, file_key, file_name)
+                    all_files.append((content,file_name))
+                for file_info in record['solutions']['value']:
+                        file_key = file_info['fileKey']
+                        file_name = file_info['name']
+                        content, _ = await download_assignment_file(client, file_key, file_name)
+                        all_files.append((content,file_name))
+        # Fetch submission files
+        print("length of all_files", len(all_files))
+        submissions_data = await fetch_data(client, "/submissions/")
+        for submission in submissions_data['records']:
+            if submission['assignment_id']['value'] == assignment_id:
+                for file_info in submission['attempt']['value']:
+                    file_key = file_info['fileKey']
+                    file_name = file_info['name']
+                    content, _ = await download_submission_file(client, file_key, file_name)
+                    all_files.append((content,file_name))
+        print("second length of all_files", len(all_files))
+    
+        # Assuming gradingChecker is a function that can process all_files
+        [score, feedback, review_areas] = gradingChecker(all_files)
+        print(score)
+        print(feedback)
+        print(review_areas)
+        
+        # Construct and return a response
+        return {
+            "score": score,
+            "feedback": feedback,
+            "review_areas": review_areas
+        }
 
 @app.get("/")
 async def read_root():
@@ -136,7 +163,7 @@ async def assignmentFiles(fileKey: str, fileName: str):
     }
     
     response = requests.get(url, headers=headers)
-    
+
     if response.status_code == 200:
         print(response)
         return Response(content=response.content, media_type="application/pdf", headers={"Content-Disposition": f"attachment; filename={fileName}.pdf"})
