@@ -3,9 +3,11 @@ from fastapi import FastAPI, HTTPException, File, UploadFile, Response, Request
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from gradingChecker import gradingChecker,process_pdfs_and_generate_feedback, extract_score, extract_feedback, extract_review_areas, clean_feedback, findRecs
-from pydantic import BaseModel
+
 import requests
 import os
+
+from pydantic import BaseModel
 from httpx import AsyncClient
 
 app = FastAPI()
@@ -264,24 +266,3 @@ async def submissions():
         error_message = response.json().get("message")
         
         raise HTTPException(status_code=response.status_code, detail=error_message)
-
-
-@app.post("/people/")
-async def people():
-    url = f"http://{KINTONE_DOMAIN}/k/v1/records.json?app={PEOPLE_ID}"
-    
-    headers = {
-        "Content-Type": "application/json",
-        "X-Cybozu-API-Token": PEOPLE_TOKEN,
-    }
-    
-    response = requests.get(url, headers=headers)
-    
-    if response.status_code == 200:
-        return response.json()
-    else:
-                
-        error_message = response.json().get("message")
-        
-        raise HTTPException(status_code=response.status_code, detail=error_message)
-    
