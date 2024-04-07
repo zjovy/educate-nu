@@ -1,7 +1,8 @@
 from http.client import HTTPException
-from fastapi import FastAPI, HTTPException, File, UploadFile
+from fastapi import FastAPI, HTTPException, File, UploadFile, Response
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
+
 import requests
 import os
 
@@ -52,8 +53,28 @@ async def assignments():
         
         raise HTTPException(status_code=response.status_code, detail=error_message)
     
+@app.get("/assignmentFiles/")
+async def assignmentFiles(fileKey: str, fileName: str):
+    url = f"http://{KINTONE_DOMAIN}/k/v1/file.json?fileKey={fileKey}"
+    headers = {
+        "Content-Type": "application/json",
+        "X-Cybozu-API-Token": ASSIGNMENTS_TOKEN,
+    }
+    
+    response = requests.get(url, headers=headers)
+    
+    if response.status_code == 200:
+        print(response)
+        return Response(content=response.content, media_type="application/pdf", headers={"Content-Disposition": f"attachment; filename={fileName}.pdf"})
+    else:       
+        error_message = response.json().get("message")
+        raise HTTPException(status_code=response.status_code, detail=error_message)
+
+    
+
+
 @app.get("/courses/")
-async def assignments():
+async def courses():
     url = f"http://{KINTONE_DOMAIN}/k/v1/records.json?app={COURSES_ID}"
     
     headers = {
@@ -72,7 +93,7 @@ async def assignments():
         raise HTTPException(status_code=response.status_code, detail=error_message)
 
 @app.get("/enrollments/")
-async def assignments():
+async def enrollments():
     url = f"http://{KINTONE_DOMAIN}/k/v1/records.json?app={ENROLLMENTS_ID}"
     
     headers = {
@@ -91,7 +112,7 @@ async def assignments():
         raise HTTPException(status_code=response.status_code, detail=error_message)
     
 @app.get("/people/")
-async def assignments():
+async def people():
     url = f"http://{KINTONE_DOMAIN}/k/v1/records.json?app={PEOPLE_ID}"
     
     headers = {
@@ -110,7 +131,7 @@ async def assignments():
         raise HTTPException(status_code=response.status_code, detail=error_message)
     
 @app.get("/submissions/")
-async def assignments():
+async def submissions():
     url = f"http://{KINTONE_DOMAIN}/k/v1/records.json?app={SUBMISSIONS_ID}"
     
     headers = {
@@ -127,3 +148,26 @@ async def assignments():
         error_message = response.json().get("message")
         
         raise HTTPException(status_code=response.status_code, detail=error_message)
+
+
+@app.post("/people/")
+async def people():
+    url = f"http://{KINTONE_DOMAIN}/k/v1/records.json?app={PEOPLE_ID}"
+    
+    headers = {
+        "Content-Type": "application/json",
+        "X-Cybozu-API-Token": PEOPLE_TOKEN,
+    }
+    
+    response = requests.get(url, headers=headers)
+    
+    if response.status_code == 200:
+        return response.json()
+    else:
+                
+        error_message = response.json().get("message")
+        
+        raise HTTPException(status_code=response.status_code, detail=error_message)
+    
+    
+    
