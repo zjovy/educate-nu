@@ -27,7 +27,7 @@ function App() {
       </div>}
       {loggedIn && <div className="bg-ghost-white min-h-screen flex flex-col">
         {userType === "student" && <Student userID={userID} userName={userName}/>}
-        {userType === "teacher" && <Teacher />}
+        {userType === "teacher" && <Teacher teacherID={userID} teacherName={userName}/>}
       </div>}
     </div>
   )
