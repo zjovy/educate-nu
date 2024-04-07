@@ -4,30 +4,6 @@ import PropTypes from 'prop-types';
 import { fetchData } from '../apiService';
 
 const Login = (props) => {
-    const addNewPerson = async () => {
-        const newPersonData = {
-            first: "Jane",
-            last: "Doe",
-            email: "jane.doe@example.com",
-            personType: "Student"
-        };
-    
-        try {
-            // Since the default method is 'GET', we need to specify that this request is a 'POST'
-            // Also, we're assuming the API expects the payload directly, without nesting under a 'body' key
-            const response = await fetchData('people/?first=kiwi&last=kiwi&email=popos@gmail.com&personType=Teacher', {
-                method: 'POST',
-            });
-
-            console.log("Person added successfully:", response);
-            return null;
-            
-            // Handle success response, e.g., update UI or state to reflect the new person added
-        } catch (error) {
-            console.error("Failed to add new person:", error);
-            // Handle error, e.g., show error message to the user
-        }
-    };
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -69,7 +45,6 @@ const Login = (props) => {
             props.setUserName(userName)
             props.setLoggedIn(true);
             props.setShowLogin(false);
-            addNewPerson();
         } else {
             // If user not found, handle accordingly (e.g., show an error message)
             alert('User not found. Please check your email or sign up.');

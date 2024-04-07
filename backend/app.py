@@ -264,5 +264,4 @@ async def submissions():
     else:
                 
         error_message = response.json().get("message")
-        
         raise HTTPException(status_code=response.status_code, detail=error_message)
