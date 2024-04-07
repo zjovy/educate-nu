@@ -2,15 +2,17 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import AssignmentDetails from './AssignmentDetails';
 
-const Assignment = ({ assignment }) => {
+const Assignment = ({ assignment, setDetailsOn }) => {
     const [isDetailsVisible, setIsDetailsVisible] = useState(false);
 
     const showDetails = () => {
         setIsDetailsVisible(true);
+        setDetailsOn(true);
     };
 
     const hideDetails = () => {
         setIsDetailsVisible(false);
+        setDetailsOn(false);
     };
 
     const handleFileUpload = (event) => {
@@ -20,7 +22,7 @@ const Assignment = ({ assignment }) => {
 
     return (
       <>
-        <div className="bg-white p-4 shadow rounded mb-4 cursor-pointer hover:bg-gray-200 transform hover:-translate-y-1 transition duration-300 ease-in-out" onClick={showDetails}>
+        <div className="bg-[#E8E9F3] p-4 shadow rounded mb-4 cursor-pointer hover:bg-gray-200 transform hover:-translate-y-1 transition duration-300 ease-in-out" onClick={showDetails}>
           <h3 className="font-bold text-lg">{assignment.title}</h3>
           <p>Due date: {assignment.dueDate}</p>
           {/* Render more assignment details here */}
@@ -45,6 +47,7 @@ Assignment.propTypes = {
         description: PropTypes.string,
         dueDate: PropTypes.string,
     }).isRequired,
+    setDetailsOn: PropTypes.func,
 };
 
 export default Assignment;

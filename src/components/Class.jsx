@@ -6,6 +6,7 @@ import Assign from './Assign';
 const Class = ({ classData, teacherView }) => {
 
   const [assigning, setAssigning] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
 
   const handleAddAssignment = () => {
     // Logic to open Assign component for this specific class
@@ -17,6 +18,7 @@ const Class = ({ classData, teacherView }) => {
   return (
     <div className="bg-[#272635] p-6 rounded shadow-lg mb-6 relative">
       {assigning && <div className="modal-backdrop"></div>}
+      {showDetails && <div className="modal-backdrop"></div>}
       <h2 className="font-bold text-xl mb-4 text-[#E8E9F3]">{classData.name}</h2>
       {teacherView && (
         <button
@@ -28,7 +30,7 @@ const Class = ({ classData, teacherView }) => {
           +
         </button>
       )}
-      <Assignments assignments={classData.assignments} />
+      <Assignments assignments={classData.assignments} setShowDetails={setShowDetails}/>
       {assigning && (
         <Assign
           showAssignModal={assigning}

@@ -21,15 +21,6 @@ const Login = (props) => {
         getUserData();
     }, []);
 
-    // useEffect(() => {
-    //     fetchData("people", {
-    //         method: 'POST',
-    //         body: { first: "John", last: "Doe", email: "john.doe@example.com", type: "Student" }
-    //     })
-    //     .then(data => console.log(data))
-    //     .catch(error => console.error(error));
-    // }, [])
-
     const handleEmailChange = (event) => {
         setEmail(event.target.value);
     };

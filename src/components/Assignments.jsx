@@ -1,11 +1,11 @@
 import Assignment from './Assignment';
 import PropTypes from 'prop-types';
 
-const Assignments = ({ assignments }) => {
+const Assignments = ({ assignments, setShowDetails }) => {
   return (
     <div>
       {assignments.map((assignment) => (
-        <Assignment key={assignment.id} assignment={assignment} />
+        <Assignment key={assignment.id} assignment={assignment} setDetailsOn={setShowDetails} />
       ))}
     </div>
   );
@@ -18,6 +18,7 @@ Assignments.propTypes = {
       description: PropTypes.string,
       dueDate: PropTypes.string,
     })).isRequired,
+    setShowDetails: PropTypes.func,
 };
 
 export default Assignments;
