@@ -25,9 +25,11 @@ def get_assistant_response(assistant_id, file_ids):
             In addition, the PracticeProblems provides all of the problems. In addition, please note down the areas where the student 
             might not be understanding the material and provide constructive feedback to areas of improvement for the student. 
             At the end, please return just a score, areas where the student is struggling and why, and then a list of topics that the student should look into. 
-            The format of the headers of the response should follow the following format word for word. Score: and then Areas of Improvement: and then List of Areas to Review. 
+            The format of the headers of the response should follow the following format word for word. Score: and then Feedback: and then List of Areas to Review. 
             Can we have the List of Areas to Review just be a list of numbered topics that the student should look into. It should only be the topic in quotes. For example it could look like this:
             List of Areas to Review: 1. "Geometry" 2. "Algebra" etc etc. 
+            The score should just be a percentage between 0 and 100 symbolizing their accuracy. 
+            Feedback should provide a detailed analysis on every problem that appears to be incorrect. Please write it in the perspective of a teacher instructing a student on areas to improve. Be warm!
             Make sure the areas to review are very specific and can be used to find video resources to supplement learning.'''
     try:
         my_assistant = client.beta.assistants.update(
@@ -100,6 +102,28 @@ def process_pdfs_and_generate_feedback(assistant_id, pdf_paths):
     else:
         print("Failed to upload files, no IDs to proceed with.")
 
+def extract_score(text):
+    # Pattern to capture a percentage number (including decimals) following the "Score:" label
+    pattern = r'\*\*Score:\*\*\s*(\d+\.?\d*%)'
+    match = re.search(pattern, text)
+
+    # Return the captured score percentage if a match is found
+    return match.group(1) if match else None
+
+def extract_feedback(text):
+    # Using regex to match feedback patterns for numbered questions
+    pattern = r'\*\*Feedback:\*\*.*?\n(1\..*?)(?=\n\*\*|$)'
+    match = re.search(pattern, text, re.DOTALL)
+    if match:
+        # Extract and split the feedback for individual problems
+        feedback_section = match.group(1)
+        return re.split(r'\n(?=\d+\.)', feedback_section)
+    return []
+def clean_feedback(feedback_list):
+    # Removing source references like   from each feedback string
+    cleaned_feedback = [re.sub(r'【\d+†source】', '', feedback).strip() for feedback in feedback_list]
+    return cleaned_feedback
+
 def extract_review_areas(text):
     # Pattern to find quoted topic names in the "List of Areas to Review" section
     pattern = r'\d+\.\s*"([^"]+)"'
@@ -124,8 +148,18 @@ if __name__ == "__main__":
     filtered_topics = [topic for topic in topics if topic not in ['Geometry', 'Algebra']]
     print("Here are the filtered topics")
     print(filtered_topics)
+    recommendations = []
     for topic in filtered_topics: #this might be the worst way to do this hahaha
-        recommendations = findRecs(topic)
-        print(f"Recommendations for {topic}: {recommendations}")
+        recommendations_string = findRecs(topic)
+        print(f"Recommendations for {topic}: {recommendations_string}")
+        recommendations.append(recommendations_string)
+    score = extract_score(result)
+    feedback = extract_feedback(result) 
+    cleaned_feedback = clean_feedback(feedback)
+    if score is None:
+        score = "100%"
+    print(f"Score: {score}")
+    print(f"Feedback: {cleaned_feedback}")
+    
 
     
