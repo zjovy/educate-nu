@@ -2,15 +2,20 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 
 const Login = (props) => {
-    const [userType, setUserType] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
 
-    const handleUserTypeChange = (event) => {
-        setUserType(event.target.value);
+    const handleEmailChange = (event) => {
+        setEmail(event.target.value);
+    };
+
+    const handlePasswordChange = (event) => {
+        setPassword(event.target.value);
     };
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        props.setUserType(userType);
+        // Here you might want to add authentication logic
         props.setLoggedIn(true);
         props.setShowLogin(false);
     };
@@ -32,18 +37,28 @@ const Login = (props) => {
                 </button>
                 <h2 className="text-2xl font-bold mb-6 text-[#272635]">Login</h2>
                 <form onSubmit={handleSubmit}>
-                    <label className="block mb-5">
-                        <span className="text-[#272635] text-lg mb-3 block">Are you a student or a teacher?</span>
-                        <select
-                            className="text-lg form-select block w-full mt-1 border-gray-300 rounded shadow-sm focus:border-[#B1E5F2] focus:ring focus:ring-[#B1E5F2] focus:ring-opacity-50"
-                            value={userType}
-                            onChange={handleUserTypeChange}
-                        >
-                            <option value="">Select</option>
-                            <option value="student">Student</option>
-                            <option value="teacher">Teacher</option>
-                        </select>
-                    </label>
+                    <div className="mb-5">
+                        <label htmlFor="email" className="block text-[#272635] text-lg mb-2">Email</label>
+                        <input
+                            id="email"
+                            type="email"
+                            className="text-lg p-2 w-full border-gray-300 rounded shadow-sm focus:border-[#B1E5F2] focus:ring focus:ring-[#B1E5F2] focus:ring-opacity-50"
+                            value={email}
+                            onChange={handleEmailChange}
+                            required
+                        />
+                    </div>
+                    <div className="mb-6">
+                        <label htmlFor="password" className="block text-[#272635] text-lg mb-2">Password</label>
+                        <input
+                            id="password"
+                            type="password"
+                            className="text-lg p-2 w-full border-gray-300 rounded shadow-sm focus:border-[#B1E5F2] focus:ring focus:ring-[#B1E5F2] focus:ring-opacity-50"
+                            value={password}
+                            onChange={handlePasswordChange}
+                            required
+                        />
+                    </div>
                     <button
                         type="submit"
                         className="w-full bg-gradient-to-r from-blue-600 to-blue-300 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:ring focus:ring-[#E8E9F3] focus:ring-opacity-50 shadow-lg transition ease-in-out duration-300 transform hover:-translate-y-1"
@@ -57,9 +72,8 @@ const Login = (props) => {
 };
 
 Login.propTypes = {
-    setUserType: PropTypes.func.isRequired,
-    setShowLogin: PropTypes.func.isRequired,
     setLoggedIn: PropTypes.func.isRequired,
+    setShowLogin: PropTypes.func.isRequired,
 };
 
 export default Login;

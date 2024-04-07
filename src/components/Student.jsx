@@ -1,7 +1,23 @@
+import { useEffect, useState } from 'react';
+import { fetchData } from '../apiService';
+
 import Classes from './Classes';
 
 
 const Student = () => {
+
+    const [classes, setClasses] = useState([]);
+
+    useEffect(() => {
+        const getClasses = async () => {
+          const data = await fetchData("courses");
+          setClasses(data.records || []);
+        };
+        
+        getClasses();
+    }, []);
+
+    console.log(classes);
 
     const classesData = [
         {
