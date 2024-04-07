@@ -27,7 +27,7 @@ def get_assistant_response(assistant_id, file_ids):
             At the end, please return just a score, areas where the student is struggling and why, and then a list of topics that the student should look into. 
             The format of the headers of the response should follow the following format word for word. Score: and then Areas of Improvement: and then List of Areas to Review. 
             Can we have the List of Areas to Review just be a list of numbered topics that the student should look into. It should only be the topic in quotes. For example it could look like this:
-            List of Areas to Review: 1. "Geometry" 2. "Algebra" etc etc.
+            List of Areas to Review: 1. "Geometry" 2. "Algebra" etc etc. 
             Make sure the areas to review are very specific and can be used to find video resources to supplement learning.'''
     try:
         my_assistant = client.beta.assistants.update(
@@ -101,8 +101,8 @@ def process_pdfs_and_generate_feedback(assistant_id, pdf_paths):
         print("Failed to upload files, no IDs to proceed with.")
 
 def extract_review_areas(text):
-    # Find the "List of Areas to Review" section and extract the topics
-    pattern = r'\*\*List of Areas to Review\*\*:\n(?:\d+\.\s*"([^"]+)"[^"\n]*)'
+    # Pattern to find quoted topic names in the "List of Areas to Review" section
+    pattern = r'\d+\.\s*"([^"]+)"'
     topics = re.findall(pattern, text)
 
     return topics
@@ -121,7 +121,10 @@ if __name__ == "__main__":
     topics = extract_review_areas(result)
     print("HERE ARE THE TOPICS")
     print(topics)
-    for topic in topics:
+    filtered_topics = [topic for topic in topics if topic not in ['Geometry', 'Algebra']]
+    print("Here are the filtered topics")
+    print(filtered_topics)
+    for topic in filtered_topics: #this might be the worst way to do this hahaha
         recommendations = findRecs(topic)
         print(f"Recommendations for {topic}: {recommendations}")
 
