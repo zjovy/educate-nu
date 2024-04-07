@@ -1,12 +1,9 @@
 from openai import OpenAI
 import os
-import pdfplumber
-import json
-from pathlib import Path
 from dotenv import load_dotenv
 import time
-from findRecs import search_duckduckgo
-
+from findRecs import findRecs
+import re
 # Load the environment variables from .env file where your OpenAI API key is stored
 load_dotenv()
 
@@ -28,7 +25,10 @@ def get_assistant_response(assistant_id, file_ids):
             In addition, the PracticeProblems provides all of the problems. In addition, please note down the areas where the student 
             might not be understanding the material and provide constructive feedback to areas of improvement for the student. 
             At the end, please return just a score, areas where the student is struggling and why, and then a list of topics that the student should look into. 
-            The format should be Score: and then Areas of Improvement: and then List of Areas to Review: '''
+            The format of the headers of the response should follow the following format word for word. Score: and then Areas of Improvement: and then List of Areas to Review. 
+            Can we have the List of Areas to Review just be a list of numbered topics that the student should look into. It should only be the topic in quotes. For example it could look like this:
+            List of Areas to Review: 1. "Geometry" 2. "Algebra" etc etc.
+            Make sure the areas to review are very specific and can be used to find video resources to supplement learning.'''
     try:
         my_assistant = client.beta.assistants.update(
             assistant_id=assistant_id,
@@ -89,25 +89,23 @@ def print_thread_messages(clnt: object, thrd: object, content_value: bool=True) 
             print(msg)
     return response_string
 
-# Function to save the API response to a file
-def save_response_to_file(response, file_name='response.txt'):
-    if response:
-        with open(file_name, 'w') as file:
-            file.write(response)
-    else:
-        print("No response received to save.")
-
 # Main function to tie everything together
 def process_pdfs_and_generate_feedback(assistant_id, pdf_paths):
     file_ids = [upload_file_to_openai(pdf_path) for pdf_path in pdf_paths if upload_file_to_openai(pdf_path) is not None]
     print(file_ids)
     if file_ids:
         response = get_assistant_response(assistant_id, file_ids)
-        save_response_to_file(response)
         # return the response
         return response
     else:
         print("Failed to upload files, no IDs to proceed with.")
+
+def extract_review_areas(text):
+    # Find the "List of Areas to Review" section and extract the topics
+    pattern = r'\*\*List of Areas to Review\*\*:\n(?:\d+\.\s*"([^"]+)"[^"\n]*)'
+    topics = re.findall(pattern, text)
+
+    return topics
 
 # Example usage
 if __name__ == "__main__":
@@ -120,4 +118,11 @@ if __name__ == "__main__":
     
     pdf_paths = ['/Users/Isaac/Desktop/StudentHomework.pdf', '/Users/Isaac/Desktop/PracticeProblems.pdf', '/Users/Isaac/Desktop/AnswerKey.pdf']  # Replace with your actual PDF file paths
     result = process_pdfs_and_generate_feedback(assistant_id, pdf_paths)
+    topics = extract_review_areas(result)
+    print("HERE ARE THE TOPICS")
+    print(topics)
+    for topic in topics:
+        recommendations = findRecs(topic)
+        print(f"Recommendations for {topic}: {recommendations}")
+
     

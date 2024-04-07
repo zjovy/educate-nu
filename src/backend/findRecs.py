@@ -30,15 +30,7 @@ def search_duckduckgo(prompt):
         print(f"An error occurred: {e}")
         return None
 
-
-def main(prompt):
+def findRecs(prompt):
+    print("entered findRecs")
     result = search_duckduckgo(prompt)
     return result
-
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python script_name.py prompt")
-        sys.exit(1)
-    
-    prompt = sys.argv[1]
-    main(prompt)
