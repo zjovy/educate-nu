@@ -44,12 +44,12 @@ const Assign = ({ showAssignModal, setShowAssignModal, classId }) => {
     if (!showAssignModal) return null;
 
     return (
-        <div className="fixed inset-0 z-50 overflow-auto bg-smoke-light flex">
-            <div className="relative p-8 bg-white w-full max-w-md m-auto flex-col flex rounded-lg">
+        <div className="bg-gray-600 bg-opacity-50 fixed inset-0 z-50 overflow-auto bg-smoke-light flex ">
+            <div className="relative p-8 bg-[#E8E9F3] w-full max-w-md m-auto flex-col flex rounded-lg">
                 <span className="absolute top-0 right-0 p-4">
                     <button onClick={handleClose}>×</button>
                 </span>
-                <h2 className="text-2xl font-bold mb-4">New Assignment</h2>
+                <h2 className="text-2xl text-[#272635] font-bold mb-4">New Assignment</h2>
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
                         <label htmlFor="title" className="block text-gray-700">Title</label>
@@ -91,7 +91,7 @@ const Assign = ({ showAssignModal, setShowAssignModal, classId }) => {
                             type="file"
                             accept="application/pdf"
                             onChange={(e) => setProblemFile(e.target.files[0])}
-                            className="w-full px-3 py-2 border rounded"
+                            className="w-full px-3 py-2 border rounded block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#B1E5F2] file:text-[#272635] hover:file:bg-[#96DDED]"
                         />
                     </div>
                     {/* File input for Solution Set PDF */}
@@ -102,15 +102,16 @@ const Assign = ({ showAssignModal, setShowAssignModal, classId }) => {
                             type="file"
                             accept="application/pdf"
                             onChange={(e) => setSolutionFile(e.target.files[0])}
-                            className="w-full px-3 py-2 border rounded"
+                            className="w-full px-3 py-2 border rounded block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#B1E5F2] file:text-[#272635] hover:file:bg-[#96DDED]"
                         />
                     </div>
-                    <button
-                        type="submit"
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                    >
-                        Submit
-                    </button>
+                    <div className="flex justify-center items-center">
+                        <button
+                            type="submit"
+                            className="bg-[#B1E5F2] text-[#272635] hover:bg-[#96DDED] font-bold py-2 px-4 rounded">
+                            Submit
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
