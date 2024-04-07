@@ -9,6 +9,7 @@ const Student = (props) => {
     const [courses, setCourses] = useState([]);
     const [assignments, setAssignments] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [gradedAssignments, setGradedAssignments] = useState([]);
 
     const formatDate = (dateString) => {
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -81,6 +82,29 @@ const Student = (props) => {
             fetchEnrollmentsAndCourses();
         }
     }, [props.userID, assignments]);
+    
+    useEffect(() => {
+        const fetchGradedAssignments = async () => {
+          try {
+            const response = await fetch('http://localhost:8000/assignments/graded/');
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+      
+            if (JSON.stringify(data) !== JSON.stringify(gradedAssignments)) {
+              setGradedAssignments(data);
+            }
+          } catch (error) {
+            console.error("Failed to fetch graded assignments:", error);
+          }
+        };
+      
+        fetchGradedAssignments();
+        const interval = setInterval(fetchGradedAssignments, 5000); // Poll every 5 seconds
+      
+        return () => clearInterval(interval);
+      }, [gradedAssignments]);
 
     return ( 
         <div>

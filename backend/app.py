@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException, File, UploadFile, Response, Request
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from gradingChecker import gradingChecker,process_pdfs_and_generate_feedback, extract_score, extract_feedback, extract_review_areas, clean_feedback, findRecs
-
+from typing import List
 import requests
 import os
 
@@ -15,11 +15,20 @@ app = FastAPI()
 # Add this middleware to allow CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Allows all origins
+    allow_origins=["*"],  # Allows the specific origin
     allow_credentials=True,
     allow_methods=["*"],  # Allows all methods
     allow_headers=["*"],  # Allows all headers
 )
+
+class GradedAssignment(BaseModel):
+    submissionId: int
+    grade: str
+    feedback: List[str]
+    review_areas: List[dict]
+
+# This will be our in-memory store for graded assignments
+graded_assignments_store: List[GradedAssignment] = []
 
 env_path = os.path.join(os.path.dirname(__file__), '..', '.env')
 load_dotenv(dotenv_path=env_path)
@@ -57,6 +66,12 @@ async def download_assignment_file(client, file_key, file_name):
     response = await client.get(download_url)
     response.raise_for_status()
     return response.content, file_name
+
+@app.post("/gradeNOW")
+async def grade_pdfs(graded_assignment: GradedAssignment):
+    # Add the graded assignment to the store
+    graded_assignments_store.append(graded_assignment)
+    return {"message": "Assignment graded successfully"}
 
 @app.post("/grade")
 async def grade_pdfs(data: GradingData):
@@ -105,7 +120,7 @@ async def grade_pdfs(data: GradingData):
         print(score)
         print(feedback)
         print(review_areas)
-        
+
         # Construct and return a response
         return {
             "score": score,
@@ -116,6 +131,12 @@ async def grade_pdfs(data: GradingData):
 @app.get("/")
 async def read_root():
     return {"message": "Hello from FastAPI"}
+
+@app.get("/assignments/graded/")
+async def get_graded_assignments():
+    # Return the list of graded assignments
+    return graded_assignments_store
+
 
 @app.get("/assignments/")
 async def assignments():

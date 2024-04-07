@@ -8,7 +8,10 @@ const Classes = ({ classes, teacherView }) => {
             <div className="flex flex-wrap -mx-2">
                 {classes.map((classData) => (
                     <div key={classData.id} className="px-2 mb-4 w-full md:w-1/2 lg:w-1/3 xl:w-1/4">
-                        <Class classData={classData} teacherView={teacherView} />
+                        {/* Added rounded-lg for rounded corners */}
+                        <div className="rounded-lg overflow-hidden">
+                            <Class classData={classData} teacherView={teacherView} />
+                        </div>
                     </div>
                 ))}
             </div>
