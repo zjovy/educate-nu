@@ -22,7 +22,6 @@ app.add_middleware(
 )
 
 class GradedAssignment(BaseModel):
-    submissionId: int
     grade: str
     feedback: List[str]
     review_areas: List[dict]

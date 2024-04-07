@@ -5,7 +5,7 @@ import Assignments from './Assignments';
 import Assign from './Assign';
 import { fetchData } from '../apiService';
 
-const Class = ({ classData, teacherView }) => {
+const Class = ({ classData, teacherView, feedbackData}) => {
 
   const [assigning, setAssigning] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
@@ -59,7 +59,7 @@ const Class = ({ classData, teacherView }) => {
           +
         </button>
       )}
-      <Assignments assignments={classData.assignments} setShowDetails={setShowDetails} teacherView={teacherView} students={students}/>
+      <Assignments feedbackData={feedbackData} assignments={classData.assignments} setShowDetails={setShowDetails} teacherView={teacherView} students={students}/>
       {assigning && (
         <Assign
           showAssignModal={assigning}
@@ -83,6 +83,7 @@ Class.propTypes = {
     })).isRequired,
   }).isRequired,
   teacherView: PropTypes.bool,
+  feedbackData: PropTypes.array,
 };
 
 export default Class;

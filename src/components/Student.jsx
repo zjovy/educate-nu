@@ -113,7 +113,7 @@ const Student = (props) => {
         <div>
             <h1 className="text-3xl font-bold text-[#E8E9F3] m-3">Hello, {props.userName}</h1>
             {isLoading && <LoadingSpinner />}
-            {!isLoading && <Classes classes={courses} />}
+            {!isLoading && <Classes classes={courses} feedbackData={gradedAssignments} />}
         </div>
     );
 }
