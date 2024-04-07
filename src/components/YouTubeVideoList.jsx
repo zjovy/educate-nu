@@ -1,5 +1,6 @@
-import React from 'react';
 import { Transition } from '@headlessui/react';
+
+import PropTypes from 'prop-types';
 
 const ToggleButton = ({ onClick, isVisible }) => {
   return (
@@ -9,22 +10,19 @@ const ToggleButton = ({ onClick, isVisible }) => {
   );
 };
 
-const YouTubeVideo = ({ video }) => {
-  // Extract title and URL from the video data
-  const [title, url] = video;
+ToggleButton.propTypes = {
+  onClick: PropTypes.func.isRequired,
+  isVisible: PropTypes.bool.isRequired,
+};
 
-  // Function to extract video ID from YouTube URL
+const YouTubeVideo = ({ video }) => {
+  const [title, url] = video;
   const getVideoId = (url) => {
     const videoIdMatch = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/);
     return videoIdMatch && videoIdMatch[1];
   };
-
   const videoId = getVideoId(url);
-
-  // Construct thumbnail URL
   const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
-
-  // Construct video URL
   const videoUrl = url;
 
   return (
@@ -37,6 +35,10 @@ const YouTubeVideo = ({ video }) => {
   );
 };
 
+YouTubeVideo.propTypes = {
+  video: PropTypes.arrayOf(PropTypes.string).isRequired,
+};
+
 const YouTubeVideoList = ({ urls }) => {
   return (
     <div className="flex flex-col h-screen overflow-y-auto">
@@ -45,6 +47,10 @@ const YouTubeVideoList = ({ urls }) => {
       ))}
     </div>
   );
+};
+
+YouTubeVideoList.propTypes = {
+  urls: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.string)).isRequired,
 };
 
 const YouTubeColumn = ({ isVisible, videos, toggleColumnVisibility }) => {
@@ -60,12 +66,17 @@ const YouTubeColumn = ({ isVisible, videos, toggleColumnVisibility }) => {
     >
       {(ref) => (
         <div ref={ref} className="fixed inset-y-0 right-0 w-96 bg-white shadow-lg p-4 z-50">
-          {/* <ToggleButton onClick={toggleColumnVisibility} isVisible={isVisible} /> */}
           <YouTubeVideoList urls={videos} />
         </div>
       )}
     </Transition>
   );
+};
+
+YouTubeColumn.propTypes = {
+  isVisible: PropTypes.bool.isRequired,
+  videos: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.string)).isRequired,
+  toggleColumnVisibility: PropTypes.func.isRequired,
 };
 
 export default YouTubeColumn;

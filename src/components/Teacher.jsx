@@ -3,10 +3,12 @@ import PropTypes from 'prop-types';
 
 import { fetchData } from '../apiService';
 import Classes from './Classes';
+import LoadingSpinner from './LoadingSpinner';
 
 const Teacher = (props) => {
     const [courses, setCourses] = useState([]);
     const [assignments, setAssignments] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     const formatDate = (dateString) => {
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -15,6 +17,7 @@ const Teacher = (props) => {
 
     useEffect(() => {
         const fetchAssignments = async () => {
+            setIsLoading(true);
             const assignmentsData = await fetchData("assignments");
             setAssignments(assignmentsData.records || []);
         };
@@ -24,6 +27,7 @@ const Teacher = (props) => {
 
     useEffect(() => {
         const fetchCoursesAndAssignments = async () => {
+            setIsLoading(true);
             const coursesData = await fetchData("courses");
             // Filter courses taught by the teacher
             const teacherCourses = (coursesData.records || []).filter(course => 
@@ -62,6 +66,7 @@ const Teacher = (props) => {
             });
 
             setCourses(formattedCourses);
+            setIsLoading(false);
         };
 
         if (assignments.length > 0) {
@@ -71,8 +76,9 @@ const Teacher = (props) => {
 
     return ( 
         <div>
-            <h1 className="text-3xl font-bold text-[#272635] m-3">Hello, {props.teacherName}</h1>
-            <Classes classes={courses} teacherView={true} />
+            <h1 className="text-3xl font-bold text-[#E8E9F3] m-3">Hello, {props.teacherName}</h1>
+            {isLoading && <LoadingSpinner />}
+            {!isLoading && <Classes classes={courses} teacherView={true} />}
         </div>
     );
 }

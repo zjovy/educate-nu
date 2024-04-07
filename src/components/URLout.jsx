@@ -1,7 +1,6 @@
-
-
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Transition } from '@headlessui/react';
+import PropTypes from 'prop-types';
 
 const ToggleButton = ({ onClick, isVisible }) => {
   return (
@@ -11,22 +10,21 @@ const ToggleButton = ({ onClick, isVisible }) => {
   );
 };
 
-const YouTubeVideo = ({ video }) => {
-  // Extract title and URL from the video data
-  const [title, url] = video;
+// PropTypes for ToggleButton
+ToggleButton.propTypes = {
+  onClick: PropTypes.func.isRequired,
+  isVisible: PropTypes.bool.isRequired,
+};
 
-  // Function to extract video ID from YouTube URL
+const YouTubeVideo = ({ video }) => {
+  const [title, url] = video;
   const getVideoId = (url) => {
     const videoIdMatch = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/);
     return videoIdMatch && videoIdMatch[1];
   };
 
   const videoId = getVideoId(url);
-
-  // Construct thumbnail URL
   const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
-
-  // Construct video URL
   const videoUrl = url;
 
   return (
@@ -39,6 +37,11 @@ const YouTubeVideo = ({ video }) => {
   );
 };
 
+// PropTypes for YouTubeVideo
+YouTubeVideo.propTypes = {
+  video: PropTypes.arrayOf(PropTypes.string).isRequired,
+};
+
 const YouTubeVideoList = ({ videos }) => {
   return (
     <div>
@@ -49,30 +52,45 @@ const YouTubeVideoList = ({ videos }) => {
   );
 };
 
+// PropTypes for YouTubeVideoList
+YouTubeVideoList.propTypes = {
+  videos: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.string)).isRequired,
+};
+
 const YouTubeColumn = ({ isVisible, prompts, toggleColumnVisibility }) => {
-    return (
-      <Transition
-        show={isVisible}
-        enter="transform transition duration-300 ease-out"
-        enterFrom="translate-x-full"
-        enterTo="translate-x-0"
-        leave="transition-transform transform duration-300 ease-in"
-        leaveFrom="translate-x-0"
-        leaveTo="translate-x-full"
-      >
-        {(ref) => (
-          <div ref={ref} className="fixed inset-y-0 right-0 w-96 bg-white shadow-lg p-4 z-50 overflow-y-auto">
-            {prompts.map((prompt, index) => (
-              <div key={index}>
-                <h2 className="text-lg font-bold mb-4">{prompt.prompt}</h2>
-                <YouTubeVideoList videos={prompt.videos} />
-              </div>
-            ))}
-          </div>
-        )}
-      </Transition>
-    );
-  };
+  return (
+    <Transition
+      show={isVisible}
+      enter="transform transition duration-300 ease-out"
+      enterFrom="translate-x-full"
+      enterTo="translate-x-0"
+      leave="transition-transform transform duration-300 ease-in"
+      leaveFrom="translate-x-0"
+      leaveTo="translate-x-full"
+    >
+      {(ref) => (
+        <div ref={ref} className="fixed inset-y-0 right-0 w-96 bg-white shadow-lg p-4 z-50 overflow-y-auto">
+          {prompts.map((prompt, index) => (
+            <div key={index}>
+              <h2 className="text-lg font-bold mb-4">{prompt.prompt}</h2>
+              <YouTubeVideoList videos={prompt.videos} />
+            </div>
+          ))}
+        </div>
+      )}
+    </Transition>
+  );
+};
+
+// PropTypes for YouTubeColumn
+YouTubeColumn.propTypes = {
+  isVisible: PropTypes.bool.isRequired,
+  prompts: PropTypes.arrayOf(PropTypes.shape({
+    prompt: PropTypes.string.isRequired,
+    videos: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.string)).isRequired,
+  })).isRequired,
+  toggleColumnVisibility: PropTypes.func.isRequired,
+};
   
 
 const URLout = () => {
@@ -160,6 +178,14 @@ const URLout = () => {
       <YouTubeColumn isVisible={isColumnVisible} prompts={youtubeUrls} toggleColumnVisibility={toggleColumnVisibility} />
     </div>
   );
+};
+
+URLout.propTypes = {
+  setLoggedIn: PropTypes.func.isRequired,
+  setShowLogin: PropTypes.func.isRequired,
+  setUserType: PropTypes.func.isRequired,
+  setUserID: PropTypes.func.isRequired,
+  setUserName: PropTypes.func.isRequired,
 };
 
 export default URLout;

@@ -3,10 +3,12 @@ import PropTypes from 'prop-types';
 
 import { fetchData } from '../apiService';
 import Classes from './Classes';
+import LoadingSpinner from './LoadingSpinner';
 
 const Student = (props) => {
     const [courses, setCourses] = useState([]);
     const [assignments, setAssignments] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     const formatDate = (dateString) => {
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -15,6 +17,7 @@ const Student = (props) => {
 
     useEffect(() => {
         const fetchAssignments = async () => {
+            setIsLoading(true);
             const assignmentsData = await fetchData("assignments");
             setAssignments(assignmentsData.records || []);
         };
@@ -24,6 +27,7 @@ const Student = (props) => {
 
     useEffect(() => {
         const fetchEnrollmentsAndCourses = async () => {
+            setIsLoading(true)
             const enrollmentsData = await fetchData("enrollments");
             const studentEnrollments = (enrollmentsData.records || []).filter(enrollment => 
                 enrollment.student_id.value === props.userID
@@ -68,6 +72,7 @@ const Student = (props) => {
                 return null;
             }).filter(course => course !== null);
 
+            setIsLoading(false);
             setCourses(enrolledCourses);
         };
 
@@ -79,8 +84,9 @@ const Student = (props) => {
 
     return ( 
         <div>
-            <h1 className="text-3xl font-bold text-[#272635] m-3">Hello, {props.userName}</h1>
-            <Classes classes={courses} />
+            <h1 className="text-3xl font-bold text-[#E8E9F3] m-3">Hello, {props.userName}</h1>
+            {isLoading && <LoadingSpinner />}
+            {!isLoading && <Classes classes={courses} />}
         </div>
     );
 }
