@@ -8,6 +8,11 @@ const Student = (props) => {
     const [courses, setCourses] = useState([]);
     const [assignments, setAssignments] = useState([]);
 
+    const formatDate = (dateString) => {
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      return new Date(dateString).toLocaleDateString('en-US', options);
+    };
+
     useEffect(() => {
         const fetchAssignments = async () => {
             const assignmentsData = await fetchData("assignments");
@@ -38,7 +43,7 @@ const Student = (props) => {
                         id: parseInt(assignment.assignment_id.value),
                         title: assignment.title.value,
                         description: assignment.description.value,
-                        dueDate: assignment.due.value,
+                        dueDate: formatDate(assignment.due.value),
                         problems: assignment.problems.value.map(file => ({
                             fileKey: file.fileKey,
                             name: file.name,
@@ -74,7 +79,7 @@ const Student = (props) => {
 
     return ( 
         <div>
-            <h1 className="text-3xl font-bold purple-gradient-text m-3">Hello, {props.userName}</h1>
+            <h1 className="text-3xl font-bold text-[#272635] m-3">Hello, {props.userName}</h1>
             <Classes classes={courses} />
         </div>
     );
