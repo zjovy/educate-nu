@@ -152,6 +152,7 @@ async def submissions():
 
 @app.post("/people/")
 async def newPeople(first, last, email, personType):
+    print("qwerwer")
     url = f"https://{KINTONE_DOMAIN}/k/v1/record.json?app={PEOPLE_ID}"
     
     headers = {
@@ -189,8 +190,6 @@ from pydantic import BaseModel
 class GradingData(BaseModel):
     assistant_id: str
     pdf_paths: list[str]
-
-app = FastAPI()
 
 @app.post("/grade")
 async def grade_pdfs(data: GradingData):
