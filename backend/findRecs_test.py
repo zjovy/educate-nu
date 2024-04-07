@@ -35,3 +35,23 @@ def findRecs(prompt):
     print("entered findRecs")
     result = search_duckduckgo(prompt)
     return result
+
+def main():
+    # Check if the prompt is provided as a command-line argument
+    if len(sys.argv) != 2:
+        print("Usage: python script.py <prompt>")
+        sys.exit(1)
+
+    prompt = sys.argv[1]
+
+    print(f"Searching for tutorials on {prompt}...")
+    result = findRecs(prompt)
+    if result:
+        print("Search successful!")
+        print("Data returned:")
+        print(result)
+    else:
+        print("Search failed. Please try again.")
+
+if __name__ == "__main__":
+    main()

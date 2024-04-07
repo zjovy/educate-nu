@@ -3,6 +3,8 @@ import { useState } from 'react'
 import Student from './components/Student.jsx'
 import Teacher from './components/Teacher.jsx'
 import Login from './components/Login.jsx'
+import YouTubeColumn  from './components/YouTubeVideoList.jsx'
+import URLout from './components/URLout.jsx'
 
 function App() {
 
