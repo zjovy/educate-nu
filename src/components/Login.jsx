@@ -10,12 +10,25 @@ const Login = (props) => {
 
     useEffect(() => {
         const getUserData = async () => {
-          const data = await fetchData("people");
-          setUserData(data.records || []);
+            try {
+                const data = await fetchData("people");
+                setUserData(data.records || []);
+            } catch (error) {
+                console.error("There was a problem fetching user data:", error);
+                // Handle or display the error as needed
+            }
         };
-        
         getUserData();
     }, []);
+
+    // useEffect(() => {
+    //     fetchData("people", {
+    //         method: 'POST',
+    //         body: { first: "John", last: "Doe", email: "john.doe@example.com", type: "Student" }
+    //     })
+    //     .then(data => console.log(data))
+    //     .catch(error => console.error(error));
+    // }, [])
 
     const handleEmailChange = (event) => {
         setEmail(event.target.value);

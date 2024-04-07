@@ -34,24 +34,6 @@ SUBMISSIONS_ID = os.environ.get("SUBMISSIONS_ID")
 PEOPLE_ID = os.environ.get("PEOPLE_ID")
 ENROLLMENTS_ID = os.environ.get("ENROLLMENTS_ID")
 
-def upload_file_to_kintone(file: UploadFile = File(...)):
-    url = f"https://{KINTONE_DOMAIN}/k/v1/file.json"
-    
-    headers = {
-        "X-Cybozu-API-Token": KINTONE_FILE_API_TOKEN,
-    }
-    
-    files = {
-        "file": (file.filename, file.file, file.content_type)
-    }
-    
-    response = requests.post(url, headers=headers, files=files)
-    
-    if response.status_code != 200:
-        raise HTTPException(status_code=response.status_code, detail=response.json().get("message"))
-    
-    return response.json().get("fileKey")
-
 @app.get("/assignments/")
 async def assignments():
     url = f"http://{KINTONE_DOMAIN}/k/v1/records.json?app={ASSIGNMENTS_ID}"
@@ -165,7 +147,7 @@ async def submissions():
         raise HTTPException(status_code=response.status_code, detail=error_message)
         
 @app.post("/people/")
-async def people():
+async def people(first, last, email, personType):
     url = f"http://{KINTONE_DOMAIN}/k/v1/records.json?app={PEOPLE_ID}"
     
     headers = {
