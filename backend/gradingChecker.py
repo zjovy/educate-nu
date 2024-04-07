@@ -8,13 +8,12 @@ import re
 load_dotenv()
 
 #We need to upload the file so that our model is able to analyze on these pdfs 
-def upload_file_to_openai(file_path):
+def upload_file_to_openai(file):
     file_list = []
     try:
-        with open(file_path, 'rb') as file:
-            response = client.files.create(file=file, purpose='assistants')  # The purpose might need to be changed based on the specific API endpoint you're using
+        response = client.files.create(file=file, purpose='assistants')  # The purpose might need to be changed based on the specific API endpoint you're using
             # Consider cleaning up the .jsonl file after uploading if you don't need it locally=
-            return response.id
+        return response.id
     except client.error.OpenAIError as e:
         print(f"An error occurred: {e}")
         return None, None
@@ -92,8 +91,8 @@ def print_thread_messages(clnt: object, thrd: object, content_value: bool=True) 
     return response_string
 
 # Main function to tie everything together
-def process_pdfs_and_generate_feedback(assistant_id, pdf_paths):
-    file_ids = [upload_file_to_openai(pdf_path) for pdf_path in pdf_paths if upload_file_to_openai(pdf_path) is not None]
+def process_pdfs_and_generate_feedback(assistant_id, pdf_objects):
+    file_ids = [upload_file_to_openai(pdf_object) for pdf_object in pdf_objects if upload_file_to_openai(pdf_object) is not None]
     print(file_ids)
     if file_ids:
         response = get_assistant_response(assistant_id, file_ids)
@@ -132,16 +131,14 @@ def extract_review_areas(text):
     return topics
 
 # Example usage
-if __name__ == "__main__":
+def gradingChecker(pdf_objects):
     # Initialize your OpenAI API key
     load_dotenv()
     SECRET_KEY = os.getenv("OPEN_AI_KEY")
+    global client
     client = OpenAI(api_key = SECRET_KEY)
-    # You need to replace 'your-assistant-id' with the actual ID of your assistant
     assistant_id = 'asst_yxuSKnyE945ffRG2EeiNiFHc'
-    
-    pdf_paths = ['/Users/Isaac/Desktop/StudentHomework.pdf', '/Users/Isaac/Desktop/PracticeProblems.pdf', '/Users/Isaac/Desktop/AnswerKey.pdf']  # Replace with your actual PDF file paths
-    result = process_pdfs_and_generate_feedback(assistant_id, pdf_paths)
+    result = process_pdfs_and_generate_feedback(assistant_id, pdf_objects)
     topics = extract_review_areas(result)
     print("HERE ARE THE TOPICS")
     print(topics)
@@ -160,6 +157,6 @@ if __name__ == "__main__":
         score = "100%"
     print(f"Score: {score}")
     print(f"Feedback: {cleaned_feedback}")
-    
+    return score, cleaned_feedback, recommendations
 
     
