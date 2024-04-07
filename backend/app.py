@@ -70,7 +70,6 @@ async def assignmentFiles(fileKey: str, fileName: str):
         error_message = response.json().get("message")
         raise HTTPException(status_code=response.status_code, detail=error_message)
 
-
 @app.get("/courses/")
 async def courses():
     url = f"http://{KINTONE_DOMAIN}/k/v1/records.json?app={COURSES_ID}"
