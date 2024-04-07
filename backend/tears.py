@@ -34,6 +34,24 @@ SUBMISSIONS_ID = os.environ.get("SUBMISSIONS_ID")
 PEOPLE_ID = os.environ.get("PEOPLE_ID")
 ENROLLMENTS_ID = os.environ.get("ENROLLMENTS_ID")
 
+def upload_file_to_kintone(file: UploadFile = File(...)):
+    url = f"https://{KINTONE_DOMAIN}/k/v1/file.json"
+    
+    headers = {
+        "X-Cybozu-API-Token": KINTONE_FILE_API_TOKEN,
+    }
+    
+    files = {
+        "file": (file.filename, file.file, file.content_type)
+    }
+    
+    response = requests.post(url, headers=headers, files=files)
+    
+    if response.status_code != 200:
+        raise HTTPException(status_code=response.status_code, detail=response.json().get("message"))
+    
+    return response.json().get("fileKey")
+
 @app.get("/assignments/")
 async def assignments():
     url = f"http://{KINTONE_DOMAIN}/k/v1/records.json?app={ASSIGNMENTS_ID}"
@@ -69,9 +87,6 @@ async def assignmentFiles(fileKey: str, fileName: str):
     else:       
         error_message = response.json().get("message")
         raise HTTPException(status_code=response.status_code, detail=error_message)
-
-    
-
 
 @app.get("/courses/")
 async def courses():
@@ -148,8 +163,7 @@ async def submissions():
         error_message = response.json().get("message")
         
         raise HTTPException(status_code=response.status_code, detail=error_message)
-
-
+        
 @app.post("/people/")
 async def people():
     url = f"http://{KINTONE_DOMAIN}/k/v1/records.json?app={PEOPLE_ID}"
@@ -159,15 +173,57 @@ async def people():
         "X-Cybozu-API-Token": PEOPLE_TOKEN,
     }
     
-    response = requests.get(url, headers=headers)
+    data = {
+        "first": {"value": first},
+        "last": {"value": last},
+        "email": {"value": email},
+        "type": {"value": personType}
+    }
+    
+    payload = {
+        "app": PEOPLE_ID,
+        "record": data
+    }
+    
+    response = requests.post(url, headers=headers, json=payload)
     
     if response.status_code == 200:
         return response.json()
     else:
-                
         error_message = response.json().get("message")
-        
         raise HTTPException(status_code=response.status_code, detail=error_message)
+
+@app.post("/assignments/")
+async def assignments(course_id, title, description, problem, solution, due):
+    url = f"https://{KINTONE_DOMAIN}/k/v1/record.json"
     
+    headers = {
+        "X-Cybozu-API-Token": ASSIGNMENTS_TOKEN,
+        "Content-Type": "application/json",
+    }
     
+    # Handling file upload to Kintone is a bit complex as it requires first to upload the file
+    # and then use the fileKey in the record. This example assumes that part is handled elsewhere
+    # or you adjust accordingly to your requirements.
     
+    data = {
+        "course": {"value": course_id},
+        "title": {"value": title},
+        "description": {"value": description},
+        "due": {"value": due},
+        # Assuming 'problems' and 'solutions' are fields expecting a fileKey.
+        # You would need to upload the files first to get these keys.
+    }
+    
+    payload = {
+        "app": ASSIGNMENTS_ID,
+        "record": data
+    }
+    
+    response = requests.post(url, headers=headers, json=payload)
+    
+    if response.status_code == 200:
+        return {"message": "Assignment created successfully", "details": response.json()}
+    else:
+        error_message = response.json().get("message")
+        raise HTTPException(status_code=response.status_code, detail=error_message)

@@ -23,3 +23,14 @@
 .text-ghost-white {
   color: #E8E9F3;
 }
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 40; /* Ensure this is below the modal but above other content */
+  width: 100vw;
+  height: 100vh;
+  backdrop-filter: blur(5px); /* Adjust the blur intensity as needed */
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+}
