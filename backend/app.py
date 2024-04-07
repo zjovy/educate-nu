@@ -34,11 +34,14 @@ COURSES_TOKEN = os.environ.get("COURSES_TOKEN")
 ENROLLMENTS_TOKEN = os.environ.get("ENROLLMENTS_TOKEN")
 PEOPLE_TOKEN = os.environ.get("PEOPLE_TOKEN")
 SUBMISSIONS_TOKEN = os.environ.get("SUBMISSIONS_TOKEN")
+FEEDBACK_TOKEN = os.environ.get("FEEDBACK_TOKEN")
 ASSIGNMENTS_ID = os.environ.get("ASSIGNMENTS_ID")
 COURSES_ID = os.environ.get("COURSES_ID")
 SUBMISSIONS_ID = os.environ.get("SUBMISSIONS_ID")
 PEOPLE_ID = os.environ.get("PEOPLE_ID")
 ENROLLMENTS_ID = os.environ.get("ENROLLMENTS_ID")
+FEEDBACK_ID = os.environ.get("FEEDBACK_ID")
+
 
 class GradingData(BaseModel):
     ASSIGNMENT_NAME: str
@@ -148,6 +151,36 @@ async def newAssignment(course: int, title: str, description: str, due: str,prob
         raise HTTPException(status_code=response.status_code, detail=error_message)
     
 
+@app.post("/feedback/")
+async def feedback(submission_id: int, comments: str, improve: str):
+    url = f"https://{KINTONE_DOMAIN}/k/v1/record.json?app={FEEDBACK_ID}"
+    
+    headers = {
+        "Content-Type": "application/json",
+        "X-Cybozu-API-Token": FEEDBACK_TOKEN,
+        "app": FEEDBACK_ID
+    }
+    
+    data = {
+        "submission_id": {"value": submission_id},
+        "comments": {"value": comments},
+        "improve": {"value": improve},
+    }
+    
+    payload = {
+        "app": FEEDBACK_ID,
+        "record": data
+    }
+    
+    response = requests.post(url, headers=headers, json=payload)
+    
+    if response.status_code == 200:
+        print(response.json())
+        return response.json()
+    else:
+        error_message = response.json().get("message")
+        raise HTTPException(status_code=response.status_code, detail=error_message)
+    
 
 @app.post("/grade")
 async def grade_pdfs(data: GradingData):
