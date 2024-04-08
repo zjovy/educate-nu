@@ -129,16 +129,15 @@ def extract_score(text):
     return match.group(1) if match else None
 
 def extract_feedback(text):
-    # Find the "Feedback" section and capture until "List of Areas to Review" or end of the section
-    # Pattern matches numbered items, optionally followed by "Problem X" or "Question X"
-    pattern = r'\*\*Feedback:\*\*(.*?)\n\*\*List of Areas to Review:\*\*'
-    feedback_section = re.search(pattern, text, re.DOTALL)
+    # Define the pattern to find the feedback section, capturing all content after "Feedback:" until "List of Areas to Review:" or the end of the text
+    pattern = r'\*\*Feedback:\*\*(.*?)(?:\n\*\*List of Areas to Review:\*\*|$)'
+    feedback_section_match = re.search(pattern, text, re.DOTALL)
 
-    if feedback_section:
-        feedback_section = feedback_section.group(1)
-        # Split into individual feedback items based on numbering, supporting various formats
-        feedback_items = re.split(r'\n(?=\d+\.\s*(\*\*Question\s+\d+:\*\*|\*\*Problem\s+\d+:\*\*|\d+\.\s*))', feedback_section)
-        # Strip whitespace and newlines from each feedback item
+    if feedback_section_match:
+        feedback_section = feedback_section_match.group(1)
+        # Split the feedback section into individual items, starting with a number followed by a period
+        feedback_items = re.split(r'\n(?=\d+\.\s)', feedback_section)
+        # Clean up each feedback item, removing leading and trailing whitespace
         feedback_items = [item.strip() for item in feedback_items if item.strip()]
         return feedback_items
 
