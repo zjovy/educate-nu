@@ -2,7 +2,7 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import AssignmentDetails from './AssignmentDetails';
 
-const Assignment = ({ assignment, setDetailsOn, teacherView, students }) => {
+const Assignment = ({ assignment, setDetailsOn, teacherView, students, feedbackData }) => {
     const [isDetailsVisible, setIsDetailsVisible] = useState(false);
 
     const showDetails = () => {
@@ -34,6 +34,7 @@ const Assignment = ({ assignment, setDetailsOn, teacherView, students }) => {
             onFileUpload={handleFileUpload}
             teacherView={teacherView}
             students={students}
+            feedbackData={feedbackData}
           />
         )}
       </>
@@ -50,6 +51,7 @@ Assignment.propTypes = {
     setDetailsOn: PropTypes.func,
     teacherView: PropTypes.bool,
     students: PropTypes.array,
+    feedbackData: PropTypes.array,
 };
 
 export default Assignment;

@@ -1,4 +1,4 @@
-import React from 'react';
+import PropTypes from 'prop-types';
 import { Transition } from '@headlessui/react';
 
 const ToggleButton = ({ onClick, isVisible }) => {
@@ -23,6 +23,11 @@ const ToggleButton = ({ onClick, isVisible }) => {
       )}
     </Transition>
   );
+};
+
+ToggleButton.propTypes = {
+  onClick: PropTypes.func.isRequired,
+  isVisible: PropTypes.bool.isRequired,
 };
 
 export default ToggleButton;
